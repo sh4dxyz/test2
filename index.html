@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHADY OS v0.3 | Tactical White</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap');
+        
+        :root { 
+            --matrix-orange: #ffffff; /* Thème blanc forcé */
+            --electric-purple: #cccccc; 
+            --bg: #0a0500;
+            --text-main: #ffffff;
+            --accent-rgb: 255, 255, 255;
+        }
+
+        body, html { 
+            margin: 0;
+            padding: 0; width: 100%; height: 100%; 
+            background: var(--bg); color: var(--text-main); 
+            font-family: 'Courier New', monospace; overflow: hidden; 
+            transition: color 0.8s ease-in-out;
+        }
+        
+        #viewport { 
+            position: relative;
+            width: 100vw; height: 100vh; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        header { 
+            position: absolute;
+            width: 100%; top: 5vh; 
+            display: flex; flex-direction: column; align-items: center; z-index: 1000;
+        }
+
+        #ascii-title {
+            font-family: monospace;
+            white-space: pre; line-height: 1.2; 
+            display: inline-block; font-size: 1.8vw; color: var(--matrix-orange);
+            text-align: center; animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        .glitch-active { animation: glitch-anim 0.2s linear infinite !important; text-shadow: 2px 0 #888, -2px 0 #555; }
+
+        @keyframes glitch-anim {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 2px); }
+            40% { transform: translate(-3px, -2px); }
+            60% { transform: translate(3px, 2px); }
+            80% { transform: translate(3px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        #game-menu { display: flex; flex-direction: column; gap: 20px; text-align: center; z-index: 500; }
+
+        .menu-item {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 3rem; font-weight: 900;
+            color: var(--matrix-orange); cursor: pointer; text-decoration: none;
+            transition: all 0.3s ease; letter-spacing: 5px; position: relative;
+        }
+
+        .menu-item::before { content: ">"; position: absolute; left: -40px; opacity: 0; transition: all 0.2s ease; }
+        .menu-item:hover::before { opacity: 1; left: -30px; }
+        .menu-item:hover { transform: scale(1.05); text-shadow: 0 0 20px var(--matrix-orange); }
+
+        .crt-effect::before {
+            content: " ";
+            display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.02));
+            z-index: 99999; background-size: 100% 3px, 3px 100%; pointer-events: none;
+        }
+
+        .scanline-distort {
+            position: absolute;
+            top: -100px; left: 0; width: 100%; height: 100px;
+            background: rgba(255, 255, 255, 0.05); opacity: 0.2; z-index: 100000;
+            pointer-events: none;
+            filter: blur(5px); animation: scanline-pass 3s linear infinite;
+        }
+
+        @keyframes scanline-pass { 0% { top: -100px; } 100% { top: 100%; } }
+
+        .overlay {
+            position: fixed;
+            top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+            width: 90%; height: 85%; background: rgba(10, 10, 10, 0.98);
+            border: 1px solid var(--matrix-orange); z-index: 20000; display: none; padding: 20px; 
+            color: var(--matrix-orange); flex-direction: column; opacity: 0; transition: all 0.4s ease;
+            box-sizing: border-box;
+        }
+        .overlay.active { display: flex; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+        #portfolio-overlay { z-index: 20000; overflow-y: auto; }
+
+        #video-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border: 1px solid var(--matrix-orange);
+            background: #000;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+
+        .eye-candy-btn { background: none; border: 1px solid var(--matrix-orange); color: var(--matrix-orange); padding: 8px; font-family: 'Syncopate'; font-size: 9px; cursor: pointer; transition: 0.3s; }
+        .eye-candy-btn:hover { background: var(--matrix-orange); color: black; box-shadow: 0 0 15px var(--matrix-orange); }
+
+        footer { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: center; /* Centré car plus de bouton palette */
+            align-items: center; padding: 0 40px; box-sizing: border-box; font-size: 9px; z-index: 1000;
+        }
+
+        @media (max-width: 600px) {
+            #ascii-title { font-size: 3.5vw; }
+            .menu-item { font-size: 1.8rem !important; }
+            #video-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="crt-effect">
+    <div class="scanline-distort"></div>
+
+    <header>
+        <div id="ascii-title">
+ ___ _  _   _   ___  __   __   ___  ___ 
+/ __| || | /_\ |   \ \ \ / /  / _ \/ __|
+\__ \ __ |/ _ \| |) | \ V /  | (_) \__ \
+|___/_||_/_/ \_\___/   |_|    \___/|___/
+                v0.3
+        </div>
+    </header>
+
+    <div id="viewport">
+        <nav id="game-menu">
+            <div class="menu-item" onclick="openPortfolio()">PORTFOLIO</div>
+            <div class="menu-item" onclick="window.open('https://soundcloud.com', '_blank')">SOUNDCLOUD</div>
+            <div class="menu-item" onclick="window.location.href = 'mailto:shady.beckoury@gmail.com'">CONTACT</div>
+        </nav>
+    </div>
+
+    <div id="portfolio-overlay" class="overlay">
+        <div style="border-bottom: 1px solid var(--matrix-orange); padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; font-size: 12px;">
+            <span style="font-weight: bold;">[ PORTFOLIO_SHOWCASE ]</span>
+            <span onclick="closePortfolio()" style="cursor:pointer; font-weight: bold;">✕ FERMER</span>
+        </div>
+        
+        <div id="video-grid">
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/JVr6fLRFF6E?modestbranding=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/9B5XMo0LKks?modestbranding=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/ExgJBk3AgXk?modestbranding=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/uw9A8QfMdIw?modestbranding=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content: center; margin-top: 10px;">
+            <button onclick="closePortfolio()" class="eye-candy-btn">RETOUR AU MENU</button>
+        </div>
+    </div>
+
+    <footer>
+        <div style="letter-spacing: 2px; opacity: 0.7;">TACTICAL_WHITE_v3.0</div>
+    </footer>
+
+<script>
+    const portfolio = document.getElementById('portfolio-overlay');
+    const asciiTitle = document.getElementById('ascii-title');
+
+    // --- PORTFOLIO FUNCTIONS ---
+    function openPortfolio() { 
+        portfolio.classList.add('active');
+    }
+    
+    function closePortfolio() { 
+        portfolio.classList.remove('active');
+    }
+
+    // --- GLITCH ANIMATION ---
+    setInterval(() => { 
+        asciiTitle.classList.add('glitch-active'); 
+        setTimeout(() => asciiTitle.classList.remove('glitch-active'), 250); 
+    }, 4000);
+
+</script>
+</body>
+</html>
